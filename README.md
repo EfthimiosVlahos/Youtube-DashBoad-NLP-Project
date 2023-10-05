@@ -4,7 +4,7 @@
     <br>
 	<a href="#">
         <img height=100 src="https://cdn.svgporn.com/logos/youtube-icon.svg" hspace=20> 
-	<img src="https://raw.githubusercontent.com/Thomas-George-T/Thomas-George-T/master/assets/python.svg" alt="Python" title="Python" width ="120" />
+	<img height=100 src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1200px-Python-logo-notext.svg.png" hspace=20 >
         <img height=100 src="https://cdn.svgporn.com/logos/streamlit.svg" hspace=20> 
   	</a>	
 </p>
