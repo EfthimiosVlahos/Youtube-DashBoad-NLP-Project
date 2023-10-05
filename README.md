@@ -1,5 +1,5 @@
 # YouTube Dashboard on Streamlit
-
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://youtube-dashboad-efthimiosvlahos-nlp-project-eqbg6nwmt2fwgjc8qu.streamlit.app/)
 <p align="center">  
     <br>
 	<a href="#">
