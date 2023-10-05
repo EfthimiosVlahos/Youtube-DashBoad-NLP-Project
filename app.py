@@ -8,6 +8,18 @@ from millify import millify
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from transform import parse_video, youtube_metrics
+import re  # Importing re module for regex
+
+
+# Validate YouTube URL function
+def validate_url(url):
+    youtube_regex = (
+        r"(https?://)?(www\.)?"
+        "(youtube|youtu|youtube-nocookie)\.(com|be)/"
+        "(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})"
+    )
+    youtube_pattern = re.compile(youtube_regex)
+    return bool(youtube_pattern.match(url))
 
 
 st.set_page_config(page_title="YouTube Analytics Dashboard")
@@ -16,12 +28,11 @@ st.title("YouTube Analytics Dashboard")
 
 VIDEO_URL = st.text_input("Enter URL")
 
-
 if st.button("Example"):
     VIDEO_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 try:
-    if VIDEO_URL:
+    if VIDEO_URL and validate_url(VIDEO_URL):
         with st.spinner("Crunching numbers..."):
             df = parse_video(VIDEO_URL)
             df_metrics = youtube_metrics(VIDEO_URL)
@@ -35,23 +46,29 @@ try:
             # Embedded Video
             st.video(VIDEO_URL)
 
+            # Subfunction to display data
+            def display_data(subheader, dataframe, columns):
+                st.subheader(subheader)
+                gd = GridOptionsBuilder.from_dataframe(dataframe.head(11))
+                gridoptions = gd.build()
+                AgGrid(
+                    dataframe.head(11),
+                    gridOptions=gridoptions,
+                    theme="streamlit",
+                    columns_auto_size_mode="FIT_CONTENTS",
+                    update_mode="NO_UPDATE",
+                )
+
             # Top Comments
-            st.subheader("Most liked comments")
             df_top = (
                 df[["Author", "Comment", "Timestamp", "Likes"]]
                 .sort_values("Likes", ascending=False)
                 .reset_index(drop=True)
             )
-            # st.dataframe(df_top.head(11))
-
-            gd1 = GridOptionsBuilder.from_dataframe(df_top.head(11))
-            gridoptions1 = gd1.build()
-            AgGrid(
-                df_top.head(11),
-                gridOptions=gridoptions1,
-                theme="streamlit",
-                columns_auto_size_mode="FIT_CONTENTS",
-                update_mode="NO_UPDATE",
+            display_data(
+                "Most liked comments",
+                df_top,
+                ["Author", "Comment", "Timestamp", "Likes"],
             )
 
             # Top Languages
@@ -62,39 +79,28 @@ try:
                 .rename_axis("Language")
                 .reset_index(name="count")
             )
-
             options2 = {
                 "tooltip": {
                     "trigger": "axis",
                     "axisPointer": {"type": "shadow"},
                     "formatter": "{b}: {c}%",
                 },
-                "yAxis": {
-                    "type": "category",
-                    "data": df_langs["Language"].tolist(),
-                },
+                "yAxis": {"type": "category", "data": df_langs["Language"].tolist()},
                 "xAxis": {"type": "value", "axisTick": {"alignWithLabel": "true"}},
                 "series": [{"data": df_langs["count"].tolist(), "type": "bar"}],
             }
             st_echarts(options=options2, height="500px")
 
             # Most Replied Comments
-            st.subheader("Most Replied Comments")
             df_replies = (
                 df[["Author", "Comment", "Timestamp", "TotalReplies"]]
                 .sort_values("TotalReplies", ascending=False)
                 .reset_index(drop=True)
             )
-            # st.dataframe(df_replies.head(11))
-
-            gd2 = GridOptionsBuilder.from_dataframe(df_replies.head(11))
-            gridoptions2 = gd2.build()
-            AgGrid(
-                df_replies.head(11),
-                gridOptions=gridoptions2,
-                theme="streamlit",
-                columns_auto_size_mode="FIT_CONTENTS",
-                update_mode="NO_UPDATE",
+            display_data(
+                "Most Replied Comments",
+                df_replies,
+                ["Author", "Comment", "Timestamp", "TotalReplies"],
             )
 
             # Sentiments of the Commentors
@@ -106,7 +112,6 @@ try:
                 .rename_axis("Sentiment")
                 .reset_index(name="counts")
             )
-
             data_sentiments["Review_percent"] = (
                 100.0 * data_sentiments["counts"] / data_sentiments["counts"].sum()
             ).round(1)
@@ -138,32 +143,28 @@ try:
                         },
                         "labelLine": {"show": False},
                         "data": [
-                            # NEUTRAL
                             {
                                 "value": parsed["data"][1][2],
                                 "name": parsed["data"][1][0],
-                            },
-                            # POSITIVE
+                            },  # NEUTRAL
                             {
                                 "value": parsed["data"][0][2],
                                 "name": parsed["data"][0][0],
-                            },
-                            # NEGATIVE
+                            },  # POSITIVE
                             {
                                 "value": parsed["data"][2][2],
                                 "name": parsed["data"][2][0],
-                            },
+                            },  # NEGATIVE
                         ],
                     }
                 ],
             }
-            st_echarts(
-                options=options,
-                height="500px",
-            )
+            st_echarts(options=options, height="500px")
 
-except:
-    st.error(
-        " The URL Should be of the form: https://www.youtube.com/watch?v=videoID",
-        icon="🚨",
-    )
+    elif VIDEO_URL and not validate_url(VIDEO_URL):
+        st.error(
+            "🚨 The URL Should be of the form: https://www.youtube.com/watch?v=videoID"
+        )
+
+except Exception as e:
+    st.error(f"An error occurred: {str(e)}")
