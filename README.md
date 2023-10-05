@@ -1,7 +1,3 @@
-![GitHub](https://img.shields.io/github/license/Thomas-George-T/Streamlit-YouTube-Dashboard.svg?style=flat)
-![GitHub top language](https://img.shields.io/github/languages/top/Thomas-George-T/Streamlit-YouTube-Dashboard.svg?style=flat)
-![GitHub last commit](https://img.shields.io/github/last-commit/Thomas-George-T/Streamlit-YouTube-Dashboard.svg?style=flat)
-![ViewCount](https://views.whatilearened.today/views/github/Thomas-George-T/Streamlit-YouTube-Dashboard.svg?cache=remove)
 
 # YouTube Dashboard on Streamlit
 
